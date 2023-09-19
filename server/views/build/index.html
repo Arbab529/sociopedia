@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Verification</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 95vh;
+      }
+
+      h1 {
+        color: #333;
+      }
+
+      .verification-message {
+        font-size: 24px;
+        margin: 20px 0;
+      }
+
+      .verified {
+        color: green;
+      }
+
+      .not-verified {
+        color: red;
+      }
+      #button {
+        border: none;
+        outline: none;
+        padding: 10px 20px;
+        background: rgb(0, 155, 227);
+        color: white;
+        cursor: pointer;
+        display: inline-block;
+        text-decoration: none;
+        font-size: 20px;
+        border-radius: 5px;
+      }
+      h1 {
+        margin: 0;
+        padding: 0;
+      }
+      .card {
+        box-shadow: 0px 0px 10px#dad7d7;
+        max-width: 500px;
+        padding: 50px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="card">
+      <h1>Status</h1>
+      <div class="verification-message" id="verification-message"></div>
+      <a href="http://localhost:9001/login" id="button">Login</a>
+    </div>
+  </body>
+  <script>
+    // Get the status parameter from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const status = urlParams.get("status");
+    const message = urlParams.get("message");
+    const verificationMessageElement = document.getElementById(
+      "verification-message"
+    );
+
+    // Check the status and display the result
+    if (status === "success") {
+      verificationMessageElement.textContent = message;
+      verificationMessageElement.classList.add("verified");
+    } else if (status === "error") {
+      verificationMessageElement.textContent = message;
+      verificationMessageElement.classList.add("not-verified");
+    } else {
+      verificationMessageElement.textContent = message;
+    }
+  </script>
+</html>

@@ -25,9 +25,9 @@ var userSchema = new mongoose.Schema(
     location: { type: String },
     profileUrl: { type: String },
     profession: { type: String },
-    friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "Users" }],
+    friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     views: [{ type: String }],
-    verified: [{ type: Boolean, default: false }],
+    verified: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
