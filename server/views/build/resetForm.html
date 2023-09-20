@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Password Reset</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 90vh;
+        font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+      }
+      .form-page {
+        text-align: center;
+      }
+      #resetPasswordForm {
+        border: 1px solid rgb(190, 190, 190);
+        text-align: center;
+        width: 400px;
+        padding: 50px;
+      }
+      #resetPasswordForm label {
+        margin-bottom: 20px;
+        display: inline-block;
+      }
+      input {
+        padding: 10px;
+        font-size: 18px;
+        border: 1px solid rgb(190, 190, 190);
+      }
+      button {
+        border: none;
+        outline: none;
+        padding: 10px 20px;
+        background: rgb(0, 155, 227);
+        color: white;
+        cursor: pointer;
+        display: inline-block;
+        text-decoration: none;
+        font-size: 20px;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="form-page">
+      <h1>Sociopedia - Reset Password</h1>
+      <form id="resetPasswordForm">
+        <input
+          type="password"
+          id="newPassword"
+          name="newPassword"
+          required
+          placeholder="Enter New Password"
+        /><br /><br />
+
+        <button type="submit" id="submitBtn">Reset Password</button>
+      </form>
+    </div>
+
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const userId = urlParams.get("id");
+
+      const resetPasswordForm = document.getElementById("resetPasswordForm");
+
+      resetPasswordForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        const newPassword = document.getElementById("newPassword").value;
+
+        // Create a JSON object with the data
+        const requestData = {
+          userId: userId,
+          password: newPassword,
+        };
+
+        // Send a POST request to the endpoint
+        fetch("/users/reset-password", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestData),
+        })
+          .then((response) => {
+            if (response.status === 200) {
+              alert("Password reset successful!");
+              window.location.replace("/users/login");
+            } else {
+              alert("Password reset failed. Please try again.");
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("An error occurred while resetting the password.");
+          });
+      });
+    </script>
+  </body>
+</html>

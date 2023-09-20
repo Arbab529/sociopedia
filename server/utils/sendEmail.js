@@ -4,10 +4,12 @@ const { v4 } = require("uuid");
 const path = require("path");
 const { hashString } = require("./index.js");
 const Verification = require("../model/emailVerification.js");
+const PasswordReset = require("../model/passwordReset.js");
 
 dotenv.config({ path: path.resolve(__dirname, "../config/config.env") });
 
 const { AUTH_EMAIL, AUTH_PASSWORD, APP_URL } = process.env;
+
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 465,
@@ -49,7 +51,7 @@ const sendVerificationEmail = async (user, res) => {
       transporter
         .sendMail(mailOptions)
         .then(() => {
-          res.status(200).json({
+          res.status(201).json({
             success: "PENDING",
             message:
               "Verification email has been sent to your email. Please check your email and verify your account",
@@ -70,6 +72,60 @@ const sendVerificationEmail = async (user, res) => {
   }
 };
 
+const resetPasswordLink = async (user, res) => {
+  const { _id, email, lastname } = user;
+  const token = _id + v4();
+  const link = APP_URL + "/users/reset-password/" + _id + "/" + token;
+  const mailOptions = {
+    from: AUTH_EMAIL,
+    to: email,
+    subject: "Sociopedia - Reset Password",
+    html: `<div style="padding: 20px; background-color: #f4f4f4;">
+                <div style="max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff;">
+                    <h1 style="color: #333;">Reset Password</h1>
+                    <h3 style="color: #333;">Hello, ${lastname}!</h3>
+                    <p style="color: #777;">Please click on the button below to reset your Password</p>
+                    <a href=${link} style="text-decoration: none; background-color: #007BFF; color: #fff; padding: 10px 20px; border-radius: 4px; margin:10px 0!important; display:inline-block">Reset Password</a>
+                    <p style="color: red">This reset link will expire after 10 minutes.</p>
+                </div>
+            </div>`,
+  };
+
+  try {
+    const hashedString = await hashString(token);
+    const resetEmail = await PasswordReset.create({
+      userId: _id,
+      email: email,
+      token: hashedString,
+      createdAt: Date.now(),
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+    });
+    if (resetEmail) {
+      transporter
+        .sendMail(mailOptions)
+        .then(() => {
+          res.status(201).json({
+            success: "PENDING",
+            message:
+              "Password reset link has been sent to your email. Please check your email.",
+          });
+        })
+        .catch((error) => {
+          console.log(error);
+          res.status(404).json({
+            message: "Something went wrong",
+          });
+        });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(404).json({
+      message: "something went wrong",
+    });
+  }
+};
+
 module.exports = {
   sendVerificationEmail,
+  resetPasswordLink,
 };
