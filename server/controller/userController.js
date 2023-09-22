@@ -2,7 +2,6 @@ const Users = require("../model/userModel");
 const asyncErrorhandler = require("express-async-handler");
 const { hashString, compareString, createJWT } = require("../utils/index");
 const Verification = require("../model/emailVerification");
-const expressAsyncHandler = require("express-async-handler");
 const PasswordReset = require("../model/passwordReset");
 const { resetPasswordLink } = require("../utils/sendEmail");
 const Request = require("../model/friendRequestModel");
@@ -20,7 +19,7 @@ const verifyEmail = asyncErrorhandler(async (req, res, next) => {
         await Verification.findOneAndDelete({ userId })
           .then(() => {
             // If token expired and removed from DB then remove user also from DB
-            Users.findByIdAndDelete({ userId })
+            Users.findByIdAndDelete(userId)
               .then(() => {
                 const message = "verification token has been expired";
                 res.redirect(`/users/verified?status=error&message=${message}`);
@@ -248,7 +247,7 @@ const friendRequest = asyncErrorhandler(async (req, res, next) => {
       requestTo,
     });
     if (requestExist) {
-      next("Friend request already exists");
+      next("Friend request already sent");
       return;
     }
     const newReq = await Request.create({
@@ -269,6 +268,23 @@ const friendRequest = asyncErrorhandler(async (req, res, next) => {
 });
 const getFriendRequest = asyncErrorhandler(async (req, res, next) => {
   try {
+    const { userId } = req.body.user;
+    const request = await Request.find({
+      requestTo: userId,
+      requestStatus: "Pending",
+    })
+      .populate({
+        path: "requestFrom",
+        select: "firstname lastname profileUrl profession -password",
+      })
+      .limit(10)
+      .sort({
+        _id: -1,
+      });
+    res.status(200).json({
+      success: true,
+      data: request,
+    });
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -277,8 +293,76 @@ const getFriendRequest = asyncErrorhandler(async (req, res, next) => {
     });
   }
 });
+
 const acceptRequest = asyncErrorhandler(async (req, res, next) => {
   try {
+    const id = req.body.user.userId;
+    console.log(id);
+    const { rid, status } = req.body;
+    console.log(rid);
+    const request = await Request.findById(rid);
+    if (!request) {
+      next("No request found!");
+      return;
+    }
+    const newRes = await Request.findByIdAndUpdate(
+      { _id: rid },
+      { requestStatus: status }
+    );
+    if (status === "Accepted") {
+      const user = await Users.findById(id);
+      user.friends.push(newRes?.requestFrom);
+      await user.save();
+
+      const friend = await Users.findById(newRes?.requestFrom);
+      friend.friends.push(newRes?.requestTo);
+      await friend.save();
+    }
+    res.status(201).json({
+      success: true,
+      message: "Friend Request" + status,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Auth Error",
+      error: error.message,
+    });
+  }
+});
+const profileViews = asyncErrorhandler(async (req, res, next) => {
+  try {
+    const { userId } = req.body.user;
+    const { id } = req.body;
+    const user = await Users.findById(id);
+    user.views.push(userId);
+    await user.save();
+    res.status(201).json({
+      success: true,
+      message: "successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Auth Error",
+      error: error.message,
+    });
+  }
+});
+const suggestedFriends = asyncErrorhandler(async (req, res, next) => {
+  try {
+    const { userId } = req.body.user;
+    let queryObject = {};
+    queryObject._id = { $ne: userId };
+    queryObject.friends = { $nin: userId };
+    let queryResult = Users.findOne(queryObject)
+      .limit(15)
+      .select("firstname lastname profileUrl profession -password");
+    const suggestedFriends = await queryResult;
+    res.status(200).json({
+      success: true,
+      data: suggestedFriends,
+    });
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -299,4 +383,6 @@ module.exports = {
   friendRequest,
   getFriendRequest,
   acceptRequest,
+  profileViews,
+  suggestedFriends,
 };
