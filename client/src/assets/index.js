@@ -1,4 +1,4 @@
-import NoProfile from "./userprofile.png";
+import NoProfile from "./noProfile.png";
 import BgImage from "./img.jpeg";
 import bgImage from "./bgImage.jpg";
 import Logo from "./logo.png";

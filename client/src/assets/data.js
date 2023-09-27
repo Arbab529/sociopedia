@@ -160,7 +160,7 @@ export const posts = [
       "https://res.cloudinary.com/djs3wu5bg/image/upload/v1692597858/SOCIALMEDIA/hdahstpztt1fvobc13st.png",
     likes: ["64df3c064180b81adfe41d4b"],
     comments: [],
-    createdAt: "2023-08-21T06:04:18.297Z",
+    createdAt: "2023-09-28T06:04:18.297Z",
     updatedAt: "2023-08-21T06:04:18.297Z",
     __v: 0,
   },
