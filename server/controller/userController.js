@@ -86,7 +86,7 @@ const requestPasswordReset = asyncErrorhandler(async (req, res, next) => {
     const user = await Users.findOne({ email });
     if (!user) {
       return res.status(404).json({
-        status: "FAILED",
+        success: "failed",
         message: "Email address not found",
       });
     }
@@ -94,7 +94,7 @@ const requestPasswordReset = asyncErrorhandler(async (req, res, next) => {
     if (existingRequest) {
       if (existingRequest.expiresAt > Date.now()) {
         return res.status(404).json({
-          status: "PENDING",
+          success: "PENDING",
           message: "Password reset link has already been sent to your email",
         });
       }
@@ -158,12 +158,8 @@ const changePassword = asyncErrorhandler(async (req, res, next) => {
     );
     if (user) {
       await PasswordReset.findOneAndDelete({ userId: userId });
-      // return res.status(200).json({
-      //   success: true,
-      //   message: "Password reset successfully",
-      // });
       const message = "Password successfully reset";
-      res.redirect(`/users/verified?status=success&message=${message}`);
+      res.redirect(`/users/verify?status=success&message=${message}`);
       return;
     }
   } catch (error) {

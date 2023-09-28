@@ -29,15 +29,15 @@ const PostCard = ({ post, user, deletePost, likePost }) => {
         <Link to={"/profile/" + post?.userId?._id}>
           <img
             src={post?.userId?.profileUrl ?? NoProfile}
-            alt={post?.userId?.firstName}
+            alt={post?.userId?.firstname}
             className="w-10 h-10 object-cover rounded-full"
           />
         </Link>
         <div className="w-full flex justify-between">
           <div>
-            <Link to={"/profile/" + post?.userId._id}>
+            <Link to={"/profile/" + post?.userId?._id}>
               <p className="font-medium text-lg text-ascent-1">
-                {post?.userId?.firstName} {post?.userId?.lastName}
+                {post?.userId?.firstname} {post?.userId?.lastname}
               </p>
               <span className="text-ascent-2">{post?.userId?.location}</span>
             </Link>
@@ -51,7 +51,7 @@ const PostCard = ({ post, user, deletePost, likePost }) => {
         <p className="text-ascent-2">
           {showAll === post?._id
             ? post?.description
-            : post?.description.slice(0, 300)}
+            : post?.description?.slice(0, 300)}
 
           {post?.description?.length > 301 &&
             (showAll === post?._id ? (

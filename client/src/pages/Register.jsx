@@ -10,6 +10,7 @@ import { bgImage } from "../assets";
 import { BsShare } from "react-icons/bs";
 import { ImConnection } from "react-icons/im";
 import { AiOutlineInteraction } from "react-icons/ai";
+import { registerUser } from "../utils";
 
 const Register = () => {
   const {
@@ -21,7 +22,26 @@ const Register = () => {
   const [errMsg, setErrMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const dispatch = useDispatch();
-  const onSubmit = async (data) => {};
+
+  const onSubmit = async (data) => {
+    setIsSubmitting(true);
+    try {
+      const res = await registerUser(data);
+      console.log(res);
+      if (res?.status === "failed") {
+        setErrMsg(res);
+      } else {
+        setErrMsg(res);
+        setTimeout(() => {
+          window.location.replace("/login");
+        }, 6000);
+      }
+      setIsSubmitting(false);
+    } catch (error) {
+      console.log(error);
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="bg-bgColor w-full h-[100vh] flex items-center justify-center p-6">
@@ -153,9 +173,9 @@ const Register = () => {
             {errMsg?.message && (
               <span
                 className={`${
-                  errMsg.status === "failed"
-                    ? "text-[#f64949fe]"
-                    : "text-[#2ba150fe]"
+                  errMsg?.status === "failed"
+                    ? "text-[#1a1a1afe] bg-[#ff8d8dfe] px-3 py-2"
+                    : " text-[#1a1a1afe] bg-[#8effb2fe] px-3 py-2"
                 }`}
               >
                 {errMsg?.message}

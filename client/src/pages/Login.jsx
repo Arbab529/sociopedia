@@ -10,6 +10,8 @@ import { bgImage } from "../assets";
 import { BsShare } from "react-icons/bs";
 import { ImConnection } from "react-icons/im";
 import { AiOutlineInteraction } from "react-icons/ai";
+import { loginUser } from "../utils";
+import { LoginUser } from "../redux/features/userSlice";
 
 const Login = () => {
   const {
@@ -20,7 +22,25 @@ const Login = () => {
   const [errMsg, setErrMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const dispatch = useDispatch();
-  const onSubmit = async (data) => {};
+  const onSubmit = async (data) => {
+    setIsSubmitting(true);
+    try {
+      const res = await loginUser(data);
+      console.log(res);
+      if (res?.status === "failed") {
+        setErrMsg(res);
+      } else {
+        setErrMsg(res);
+        const newData = { token: res?.token, ...res?.user };
+        dispatch(LoginUser(newData));
+        window.location.replace("/");
+      }
+      setIsSubmitting(false);
+    } catch (error) {
+      console.log(error);
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="bg-bgColor w-full h-[100vh] flex items-center justify-center p-6">
@@ -78,9 +98,9 @@ const Login = () => {
             {errMsg?.message && (
               <span
                 className={`${
-                  errMsg.status === "failed"
-                    ? "text-[#f64949fe]"
-                    : "text-[#2ba150fe]"
+                  errMsg?.status === "failed"
+                    ? "text-[#ee0000fe] "
+                    : " text-[#00e231fe] "
                 }`}
               >
                 {errMsg?.message}

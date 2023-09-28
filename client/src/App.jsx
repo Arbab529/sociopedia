@@ -15,6 +15,7 @@ function Layout() {
 
 function App() {
   const theme = useSelector((state) => state?.theme);
+  const { user } = useSelector((state) => state?.user);
   return (
     <ErrorBoundary
       fallback={
@@ -39,9 +40,20 @@ function App() {
             <Route path="/profile/:id?" element={<Profile />} />
           </Route>
           {/* Public Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route
+            path="/login"
+            element={user?.token ? <Navigate to="/" replace /> : <Login />}
+          />
+          <Route
+            path="/register"
+            element={user?.token ? <Navigate to="/" replace /> : <Register />}
+          />
+          <Route
+            path="/reset-password"
+            element={
+              user?.token ? <Navigate to="/" replace /> : <ResetPassword />
+            }
+          />
         </Routes>
       </div>
     </ErrorBoundary>

@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import Loading from "../components/Loading";
 import CustomButton from "../components/CustomButton";
 import TextInput from "../components/TextInput";
+import { resetPassword } from "../utils";
 
 const ResetPassword = () => {
   const {
@@ -15,7 +16,22 @@ const ResetPassword = () => {
   const [errMsg, setErrMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const dispatch = useDispatch();
-  const onSubmit = async (data) => {};
+  const onSubmit = async (data) => {
+    setIsSubmitting(true);
+    try {
+      const res = await resetPassword(data);
+      console.log(res);
+      if (res?.status === "failed") {
+        setErrMsg(res);
+      } else {
+        setErrMsg(res);
+      }
+      setIsSubmitting(false);
+    } catch (error) {
+      console.log(error);
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="w-full h-[100vh] bg-bgColor flex items-center justify-center p-6">

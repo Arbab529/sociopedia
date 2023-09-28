@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import TopBar from "../components/TopBar";
 import ProfileCard from "../components/ProfileCard";
 import FriendsCard from "../components/FriendsCard";
-import { requests, suggest, posts } from "../assets/data";
+import { requests, suggest } from "../assets/data";
 import { NoProfile } from "../assets";
 import { Link } from "react-router-dom";
 import CustomButton from "../components/CustomButton";
@@ -14,9 +14,11 @@ import { BiImage, BiSolidVideo } from "react-icons/bi";
 import Loading from "../components/Loading";
 import PostCard from "../components/PostCard";
 import EditProfile from "../components/EditProfile";
+import { createPost, fetchPosts, handleFileUpload } from "../utils";
 
 const Home = () => {
   const { user, edit } = useSelector((state) => state?.user);
+  const { posts } = useSelector((state) => state?.posts);
   const [friendRequest, setFriendRequest] = useState(requests);
   const [suggestedFriends, setSuggestedFriends] = useState(suggest);
   const [loading, setLoading] = useState(false);
@@ -24,12 +26,55 @@ const Home = () => {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm({ mode: "onChange" });
   const [errMsg, setErrMsg] = useState("");
-  const [posting, setIsPosting] = useState(false);
+  const [posting, setPosting] = useState(false);
   const dispatch = useDispatch();
-  const handlePostSubmit = async (data) => {};
+  const handlePostSubmit = async (data) => {
+    setPosting(true);
+    setErrMsg("");
+    try {
+      // const uri = file;
+      const uri = file && (await handleFileUpload(file));
+      const newData = uri ? { ...data, image: uri } : data;
+      console.log(newData);
+      const res = await createPost("/posts/create-post", user?.token, newData);
+      if (res?.status === "failed") {
+        setErrMsg(res);
+      } else {
+        reset({
+          description: "",
+        });
+        setFile(null);
+        setErrMsg("");
+        await fetchPost();
+        setPosting(false);
+      }
+    } catch (error) {
+      console.log(error);
+      setPosting(false);
+    }
+  };
+  const fetchPost = async () => {
+    await fetchPosts(null, user?.token, null, dispatch);
+    setLoading(false);
+  };
+  const likePost = async () => {};
+  const handleDelete = async () => {};
+  const fetchFriendRequests = async () => {};
+  const fetchSuggestedFriends = async () => {};
+  const acceptFriendRequest = async () => {};
+  const getUser = async () => {};
+  useEffect(() => {
+    setLoading(true);
+    getUser();
+    fetchPost();
+    fetchFriendRequests();
+    fetchSuggestedFriends();
+  }, []);
+
   return (
     <>
       <div className="home w-full px-0 lg:px-10 pb-20 2xl:px-40 bg-bgColor lg:rounded-lg h-screen overflow-hidden">

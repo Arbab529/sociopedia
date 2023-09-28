@@ -34,7 +34,7 @@ const getPosts = asyncErrorhandler(async (req, res, next) => {
     const { userId } = req.body.user;
     const { search } = req.body;
     const user = await User.findById(userId);
-    const friends = user?.friends.toString().split(",") ?? [];
+    const friends = user?.friends?.toString().split(",") ?? [];
     friends.push(userId);
     const searchPostQuery = {
       $or: [
@@ -51,15 +51,15 @@ const getPosts = asyncErrorhandler(async (req, res, next) => {
       .sort({
         _id: -1,
       });
-    const friendsPost = posts.filter((post) => {
+    const friendsPost = posts?.filter((post) => {
       return friends.includes(post?.userId?._id.toString());
     });
-    const otherPost = posts.filter((post) => {
+    const otherPost = posts?.filter((post) => {
       return !friends.includes(post?.userId?._id.toString());
     });
     let postsRes = null;
-    if (friendsPost.length > 0) {
-      postsRes = search ? friendsPost : [...friendsPost, otherPost];
+    if (friendsPost?.length > 0) {
+      postsRes = search ? friendsPost : [...friendsPost, ...otherPost];
     } else {
       postsRes = posts;
     }

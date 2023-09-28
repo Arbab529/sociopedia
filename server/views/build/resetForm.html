@@ -66,7 +66,7 @@
 
       const resetPasswordForm = document.getElementById("resetPasswordForm");
 
-      resetPasswordForm.addEventListener("submit", function (event) {
+      resetPasswordForm.addEventListener("submit", async function (event) {
         event.preventDefault();
         const newPassword = document.getElementById("newPassword").value;
 
@@ -75,9 +75,9 @@
           userId: userId,
           password: newPassword,
         };
-
+        debugger;
         // Send a POST request to the endpoint
-        fetch("/users/reset-password", {
+        await fetch("/users/reset-password", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -85,7 +85,8 @@
           body: JSON.stringify(requestData),
         })
           .then((response) => {
-            if (response.status === 200) {
+            console.log(response);
+            if (response?.status === 200) {
               alert("Password reset successful!");
               window.location.replace("/users/login");
             } else {

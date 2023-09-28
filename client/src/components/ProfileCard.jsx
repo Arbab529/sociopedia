@@ -23,12 +23,12 @@ const ProfileCard = ({ user }) => {
         <Link to={`/profile/` + user?._id} className="flex gap-2">
           <img
             src={user?.profileUrl ?? NoProfile}
-            alt={`${user?.firstName} ${user?.lastName}`}
+            alt={`${user?.firstname} ${user?.lastname}`}
             className="w-14 h-14 rounded-full object-cover"
           />
           <div className="flex flex-col justify-center">
             <p className="text-lg font-medium text-ascent-1">
-              {user?.firstName} {user?.lastName}
+              {user?.firstname} {user?.lastname}
             </p>
             <span className="text-ascent-2">
               {user?.profession ?? "No Profession"}

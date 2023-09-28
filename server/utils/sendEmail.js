@@ -24,6 +24,7 @@ const sendVerificationEmail = async (user, res) => {
   const { _id, lastname, email } = user;
   const token = _id + v4();
   const link = APP_URL + "/users/verify/" + _id + "/" + token;
+  console.log(link);
   const mailOptions = {
     from: AUTH_EMAIL,
     to: email,
