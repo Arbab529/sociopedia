@@ -351,7 +351,7 @@ const suggestedFriends = asyncErrorhandler(async (req, res, next) => {
     let queryObject = {};
     queryObject._id = { $ne: userId };
     queryObject.friends = { $nin: userId };
-    let queryResult = Users.findOne(queryObject)
+    let queryResult = Users.find(queryObject)
       .limit(15)
       .select("firstname lastname profileUrl profession -password");
     const suggestedFriends = await queryResult;

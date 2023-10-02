@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import TopBar from "../components/TopBar";
@@ -6,17 +6,43 @@ import ProfileCard from "../components/ProfileCard";
 import FriendsCard from "../components/FriendsCard";
 import Loading from "../components/Loading";
 import PostCard from "../components/PostCard";
-import { posts } from "../assets/data";
+import { deletePost, fetchPosts, getUserInfo, likePost } from "../utils";
 
 const Profile = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.user);
-  // const { posts } = useSelector((state) => state.posts);
+  const { user } = useSelector((state) => state?.user);
+  const { posts } = useSelector((state) => state?.posts);
   const [userInfo, setUserInfo] = useState(user);
   const [loading, setLoading] = useState(false);
-  const handelDelete = () => {};
-  const handleLikePost = () => {};
+
+  const fetchPost = async () => {
+    await fetchPosts(null, user?.token, null, dispatch);
+    setLoading(false);
+  };
+  const handleLikePost = async (uri) => {
+    await likePost({ uri: uri, token: user?.token });
+    await fetchPost();
+  };
+  const getUser = async () => {
+    const res = await getUserInfo(id, user?.token);
+    setUserInfo(res);
+    setLoading(false);
+  };
+  const getPost = async () => {
+    await fetchPosts(`/posts/get-user-post/${id}`, user?.token, "", dispatch);
+    setLoading(false);
+  };
+
+  const handleDelete = async (id) => {
+    await deletePost(id, user?.token);
+    await fetchPost();
+  };
+  useEffect(() => {
+    setLoading(true);
+    getUser();
+    getPost();
+  }, [id]);
 
   return (
     <>
@@ -40,7 +66,7 @@ const Profile = () => {
                   key={post._id}
                   post={post}
                   user={user}
-                  deletePost={handelDelete}
+                  deletePost={handleDelete}
                   likePost={handleLikePost}
                 />
               ))

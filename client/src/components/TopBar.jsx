@@ -10,10 +10,13 @@ import { BsMoon, BsSunFill } from "react-icons/bs";
 import { IoMdNotificationsOutline } from "react-icons/io";
 import { SetTheme } from "../redux/features/themeSlice";
 import { Logout } from "../redux/features/userSlice";
+import { fetchPosts } from "../utils";
 
 const TopBar = () => {
   const { theme } = useSelector((state) => state?.theme);
   const { user } = useSelector((state) => state.user);
+  const { posts: initalPosts } = useSelector((state) => state.posts);
+  const [posts, setPosts] = useState(initalPosts);
   const dispatch = useDispatch();
   const {
     register,
@@ -24,6 +27,10 @@ const TopBar = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const handleSearch = async (data) => {
     console.log(data);
+  };
+  const fetchPost = async (data) => {
+    await fetchPosts("", user?.token, data, dispatch);
+    setIsSubmitting(false);
   };
 
   const handleTheme = () => {

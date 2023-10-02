@@ -1,6 +1,7 @@
 import axios from "axios";
 import { base_url } from "./config";
 import { SetPosts } from "../redux/features/postSlice";
+import { SetSuggestedFriends } from "../redux/features/userSlice";
 
 export const API = axios.create({
   baseURL: base_url,
@@ -36,7 +37,6 @@ export const handleFileUpload = async (uploadFile) => {
       }/image/upload/`,
       formData
     );
-    console.log(response?.data);
     return response?.data?.secure_url;
   } catch (error) {
     console.log(error);
@@ -93,6 +93,7 @@ export const updateUser = async (token, data) => {
     return res;
   } catch (error) {}
 };
+
 export const createPost = async (uri, token, data) => {
   try {
     const res = await apiRequest({
@@ -108,7 +109,7 @@ export const createPost = async (uri, token, data) => {
 export const fetchPosts = async (uri, token, data, dispatch) => {
   try {
     const res = await apiRequest({
-      url: "/posts",
+      url: uri || "/posts",
       token: token,
       method: "GET",
       data: data || {},
@@ -145,6 +146,30 @@ export const deletePost = async (id, token) => {
   }
 };
 
+export const getPostComments = async (id, token) => {
+  try {
+    const res = await apiRequest({
+      url: "/posts/comments/" + id,
+      token: token,
+      method: "GET",
+    });
+    return res?.data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+export const PostComment = async (url, data, token) => {
+  try {
+    const res = await apiRequest({
+      url: url,
+      token: token,
+      method: "POST",
+      data: data,
+    });
+    return res;
+  } catch (error) {}
+};
+
 export const getUserInfo = async (id, token) => {
   try {
     const uri = id === undefined ? "/users/get-user" : "/users/get-user/" + id;
@@ -164,6 +189,19 @@ export const getUserInfo = async (id, token) => {
   }
 };
 
+export const fetchSuggestedFriends = async (token, dispatch) => {
+  try {
+    const res = await apiRequest({
+      url: "/users/suggested-friends",
+      token: token,
+      method: "GET",
+    });
+    dispatch(SetSuggestedFriends(res?.data));
+
+    return res?.data;
+  } catch (error) {}
+};
+
 export const sendFriendRequest = async (id, token) => {
   try {
     const res = await apiRequest({
@@ -172,7 +210,34 @@ export const sendFriendRequest = async (id, token) => {
       method: "POST",
       data: { requestTo: id },
     });
-    return;
+    return res;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const getFriendRequest = async (token) => {
+  try {
+    const res = await apiRequest({
+      url: "/users/get-friend-request",
+      token: token,
+      method: "GET",
+    });
+    return res;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const acceptFriendRequest = async (token, id, status) => {
+  try {
+    const res = await apiRequest({
+      url: "/users/accept-request",
+      token: token,
+      method: "POST",
+      data: { rid: id, status },
+    });
+    return res;
   } catch (error) {
     console.log(error);
   }

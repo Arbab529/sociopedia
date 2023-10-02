@@ -9,6 +9,7 @@ import Loading from "./Loading";
 import { postComments } from "../assets/data";
 import { BsFillCaretLeftSquareFill } from "react-icons/bs";
 import ReplyCard from "./ReplyCard";
+import { getPostComments } from "../utils";
 
 const PostCard = ({ post, user, deletePost, likePost }) => {
   const [showAll, setShowAll] = useState(0);
@@ -17,9 +18,10 @@ const PostCard = ({ post, user, deletePost, likePost }) => {
   const [loading, setLoading] = useState(false);
   const [replyComments, setReplyComments] = useState(0);
   const [showComments, setShowComments] = useState(0);
-  const getComments = async () => {
+  const getComments = async (id) => {
     setReplyComments(0);
-    setComments(postComments);
+    const result = await getPostComments(id, user?.token);
+    setComments(result);
     setLoading(false);
   };
   const handleLike = async (uri) => {
@@ -145,7 +147,12 @@ const PostCard = ({ post, user, deletePost, likePost }) => {
                 <div className="ml-12">
                   <p className="text-ascent-2">{comment?.comment}</p>
                   <div className="mt-2 flex gap-3">
-                    <p className="flex gap-2 items-center text-base text-ascent-2 cursor-pointer">
+                    <p
+                      className="flex gap-2 items-center text-base text-ascent-2 cursor-pointer"
+                      onClick={() => {
+                        handleLike("/posts/like-comment/" + comment?._id);
+                      }}
+                    >
                       {comment?.likes?.includes(user?.id) ? (
                         <BiSolidLike size={20} color="blue" />
                       ) : (

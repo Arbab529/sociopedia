@@ -14,13 +14,29 @@ import { BiImage, BiSolidVideo } from "react-icons/bi";
 import Loading from "../components/Loading";
 import PostCard from "../components/PostCard";
 import EditProfile from "../components/EditProfile";
-import { createPost, fetchPosts, handleFileUpload, likePost } from "../utils";
+import {
+  createPost,
+  fetchPosts,
+  handleFileUpload,
+  likePost,
+  fetchSuggestedFriends,
+  sendFriendRequest,
+  getFriendRequest,
+  acceptFriendRequest,
+  getUserInfo,
+  deletePost,
+} from "../utils";
+import { LoginUser } from "../redux/features/userSlice";
 
 const Home = () => {
-  const { user, edit } = useSelector((state) => state?.user);
+  const {
+    user,
+    edit,
+    suggestedFriends: SF,
+  } = useSelector((state) => state?.user);
   const { posts } = useSelector((state) => state?.posts);
   const [friendRequest, setFriendRequest] = useState(requests);
-  const [suggestedFriends, setSuggestedFriends] = useState(suggest);
+  const [suggestedFriends, setSuggestedFriends] = useState(SF);
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState(null);
   const {
@@ -32,6 +48,7 @@ const Home = () => {
   const [errMsg, setErrMsg] = useState("");
   const [posting, setPosting] = useState(false);
   const dispatch = useDispatch();
+
   const handlePostSubmit = async (data) => {
     setPosting(true);
     setErrMsg("");
@@ -64,17 +81,47 @@ const Home = () => {
     await likePost({ uri: uri, token: user?.token });
     await fetchPost();
   };
-  const handleDelete = async (id) => {};
-  const fetchFriendRequests = async () => {};
-  const fetchSuggestedFriends = async () => {};
-  const acceptFriendRequest = async () => {};
-  const getUser = async () => {};
+  const handleDelete = async (id) => {
+    await deletePost(id, user?.token);
+    await fetchPost();
+  };
+  const fetchFriendRequests = async () => {
+    const requests = await getFriendRequest(user?.token);
+    setFriendRequest(requests?.data);
+  };
+  const fetchSuggestedFriend = async () => {
+    const data = await fetchSuggestedFriends(user?.token, dispatch);
+    setSuggestedFriends(data);
+  };
+  const handleFriendRequest = async (id) => {
+    try {
+      await sendFriendRequest(id, user?.token);
+      await fetchSuggestedFriend();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const acceptFriendRequests = async (id, status) => {
+    try {
+      await acceptFriendRequest(user?.token, id, status);
+      await fetchFriendRequests();
+      await getUser();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const getUser = async () => {
+    const res = await getUserInfo("", user?.token);
+    const newData = { token: user?.token, ...res };
+    dispatch(LoginUser(newData));
+  };
+
   useEffect(() => {
     setLoading(true);
     getUser();
     fetchPost();
     fetchFriendRequests();
-    fetchSuggestedFriends();
+    fetchSuggestedFriend();
   }, []);
 
   return (
@@ -224,12 +271,12 @@ const Home = () => {
                     >
                       <img
                         src={from?.profileUrl ?? NoProfile}
-                        alt={from?.firstName}
+                        alt={from?.firstname}
                         className="w-10 h-10 object-cover rounded-full"
                       />
                       <div className="flex-1">
                         <p className="text-base font-medium text-ascent-1">
-                          {from?.firstName} {from?.lastName}
+                          {from?.firstname} {from?.lastname}
                         </p>
                         <span className="text-sm text-ascent-2">
                           {from?.profession ?? "No Profession"}
@@ -239,10 +286,12 @@ const Home = () => {
                     <div className="flex gap-1">
                       <CustomButton
                         title="Accept"
+                        onClick={() => acceptFriendRequests(_id, "Accepted")}
                         containerStyles="bg-[#0444a4] text-xs text-white px-1.5 py-1 rounded-full"
                       />
                       <CustomButton
                         title="Deny"
+                        onClick={() => acceptFriendRequests(_id, "Denied")}
                         containerStyles="border border=[#666] text-xs text-ascent-1 px-1.5 py-1 rounded-full"
                       />
                     </div>
@@ -269,12 +318,12 @@ const Home = () => {
                     >
                       <img
                         src={friend?.profileUrl ?? NoProfile}
-                        alt={friend?.firstName}
+                        alt={friend?.firstname}
                         className="w-10 h-10 object-cover rounded-full"
                       />
                       <div className="flex-1">
                         <p className="text-base font-medium text-ascent-1">
-                          {friend?.firstName} {friend?.lastName}
+                          {friend?.firstname} {friend?.lastname}
                         </p>
                         <span className="text-sm text-ascent-2">
                           {friend?.profession ?? "No Profession"}
@@ -284,7 +333,7 @@ const Home = () => {
                     <div className="flex gap-1">
                       <button
                         className="bg-[#0444a445] text-sm text-white p-1 rounded"
-                        onClick={() => {}}
+                        onClick={() => handleFriendRequest(friend?._id)}
                       >
                         <BsPersonFillAdd size={20} className="text-[#0f52b6]" />
                       </button>
