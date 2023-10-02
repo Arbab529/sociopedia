@@ -31,7 +31,7 @@ const Profile = () => {
             </div>
           </div>
           {/* CENTER */}
-          <div className="flex-1 h-full bg-primary px-4 flex flex-col gap-4 overflow-y-auto rounded-lg">
+          <div className="flex-1 h-full bg-primary px-4 flex flex-col gap-4 overflow-y-auto rounded-lg pt-5">
             {loading ? (
               <Loading />
             ) : posts?.length > 0 ? (

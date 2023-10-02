@@ -11,7 +11,7 @@
 .topbar {
   position: sticky;
   top: 0px;
-  z-index: 49;
+  /* z-index: 49; */
 }
 
 .dots-container {

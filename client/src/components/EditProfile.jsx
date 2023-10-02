@@ -6,7 +6,8 @@ import { MdClose } from "react-icons/md";
 import TextInput from "./TextInput";
 import Loading from "./Loading";
 import CustomButton from "./CustomButton";
-import { UpdateProfile } from "../redux/features/userSlice";
+import { LoginUser, UpdateProfile } from "../redux/features/userSlice";
+import { handleFileUpload, updateUser } from "../utils";
 
 const EditProfile = () => {
   const { user } = useSelector((state) => state?.user);
@@ -19,7 +20,36 @@ const EditProfile = () => {
   const [errMsg, setErrMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const dispatch = useDispatch();
-  const onSubmit = async (data) => {};
+  const onSubmit = async (data) => {
+    setIsSubmitting(true);
+    setIsSubmitting(null);
+    try {
+      const uri = picture && (await handleFileUpload(picture));
+      const { firstname, lastname, profession, location } = data;
+      const newData = {
+        firstname,
+        lastname,
+        location,
+        profession,
+        profileUrl: uri ? uri : user?.profileUrl,
+      };
+      const res = await updateUser(user?.token, newData);
+      if (res?.status === "failed") {
+        setErrMsg(res);
+      } else {
+        setErrMsg(res);
+        const newUser = { token: res?.token, ...res?.user };
+        dispatch(LoginUser(newUser));
+        setTimeout(() => {
+          dispatch(UpdateProfile(false));
+        }, 3000);
+      }
+      setIsSubmitting(false);
+    } catch (error) {
+      console.log(error);
+      setIsSubmitting(false);
+    }
+  };
   const handleClose = () => {
     dispatch(UpdateProfile(false));
   };
@@ -28,7 +58,7 @@ const EditProfile = () => {
   };
   return (
     <>
-      <div className="fixed z-10 inset-0 overflow-y-auto">
+      <div className="fixed z-100 inset-0 overflow-y-auto">
         <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
           <div className="fixed inset-0 transition-opacity">
             <div className="absolute inset-0 bg-[#000] opacity-70"></div>
@@ -102,7 +132,7 @@ const EditProfile = () => {
               >
                 <input
                   type="file"
-                  onChange={(e) => handleSelect(e.target.files[0])}
+                  onChange={handleSelect}
                   className=""
                   id="imgUpload"
                   accept=".jpg, .png, .jpeg"

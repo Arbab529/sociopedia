@@ -36,6 +36,7 @@ export const handleFileUpload = async (uploadFile) => {
       }/image/upload/`,
       formData
     );
+    console.log(response?.data);
     return response?.data?.secure_url;
   } catch (error) {
     console.log(error);
@@ -81,6 +82,17 @@ export const resetPassword = async (data) => {
   }
 };
 
+export const updateUser = async (token, data) => {
+  try {
+    const res = await apiRequest({
+      url: "/users/update-user",
+      token: token,
+      method: "PUT",
+      data: data || {},
+    });
+    return res;
+  } catch (error) {}
+};
 export const createPost = async (uri, token, data) => {
   try {
     const res = await apiRequest({

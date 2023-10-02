@@ -22,7 +22,10 @@ const PostCard = ({ post, user, deletePost, likePost }) => {
     setComments(postComments);
     setLoading(false);
   };
-  const handleLike = async () => {};
+  const handleLike = async (uri) => {
+    await likePost(uri);
+    await getComments(post?._id);
+  };
   return (
     <div className="mb-2 bg-primary p-4 rounded-xl border border-[#66666645]">
       <div className="flex gap-3 items-center mb-2">
@@ -79,7 +82,10 @@ const PostCard = ({ post, user, deletePost, likePost }) => {
         )}
       </div>
       <div className="mt-4 flex justify-between items-center px-3 pt-3 pb-1 text-ascent-2 text-base border-t border-[#66666645]">
-        <p className="flex gap-2 items-center text-base cursor-pointer">
+        <p
+          className="flex gap-2 items-center text-base cursor-pointer"
+          onClick={() => handleLike("/posts/likes/" + post?._id)}
+        >
           {post?.likes?.includes(user?._id) ? (
             <BiSolidLike size={20} color="blue" />
           ) : (
@@ -97,7 +103,7 @@ const PostCard = ({ post, user, deletePost, likePost }) => {
           <BiComment size={20} />
           {post?.comments?.length}
         </p>
-        {user?._id === post?.userId?.id && (
+        {user?._id === post?.userId?._id && (
           <div
             className="flex gap-1 items-center text-base text-ascent-1 cursor-pointer"
             onClick={() => deletePost(post?._id)}

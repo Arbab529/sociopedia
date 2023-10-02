@@ -14,7 +14,7 @@ import { BiImage, BiSolidVideo } from "react-icons/bi";
 import Loading from "../components/Loading";
 import PostCard from "../components/PostCard";
 import EditProfile from "../components/EditProfile";
-import { createPost, fetchPosts, handleFileUpload } from "../utils";
+import { createPost, fetchPosts, handleFileUpload, likePost } from "../utils";
 
 const Home = () => {
   const { user, edit } = useSelector((state) => state?.user);
@@ -36,7 +36,6 @@ const Home = () => {
     setPosting(true);
     setErrMsg("");
     try {
-      // const uri = file;
       const uri = file && (await handleFileUpload(file));
       const newData = uri ? { ...data, image: uri } : data;
       console.log(newData);
@@ -61,8 +60,11 @@ const Home = () => {
     await fetchPosts(null, user?.token, null, dispatch);
     setLoading(false);
   };
-  const likePost = async () => {};
-  const handleDelete = async () => {};
+  const handleLikePost = async (uri) => {
+    await likePost({ uri: uri, token: user?.token });
+    await fetchPost();
+  };
+  const handleDelete = async (id) => {};
   const fetchFriendRequests = async () => {};
   const fetchSuggestedFriends = async () => {};
   const acceptFriendRequest = async () => {};
@@ -177,6 +179,14 @@ const Home = () => {
                   )}
                 </div>
               </div>
+              {file && (
+                <div className="flex items-center justify-between gap-20 bg-[#ccfecc] p-2">
+                  {`${file?.name}`}
+                  <button className="text-[red]" onClick={() => setFile(null)}>
+                    Remove
+                  </button>
+                </div>
+              )}
             </form>
             {loading ? (
               <Loading />
@@ -186,8 +196,8 @@ const Home = () => {
                   key={post._id}
                   post={post}
                   user={user}
-                  deletePost={() => {}}
-                  likePost={() => {}}
+                  deletePost={handleDelete}
+                  likePost={handleLikePost}
                 />
               ))
             ) : (
